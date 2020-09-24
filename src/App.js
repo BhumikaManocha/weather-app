@@ -6,10 +6,19 @@ export default class App extends React.Component{
   state={
     temperature : '',
     error : '',
-    isBusy : false
+    isBusy : false,
+  }
+
+  createMessage = (value)=>{
+    this.setState({error: value})
   }
 
   getTemperature = (city) => {
+    this.setState({
+      temperature : '',
+      error : '',
+      isBusy : false,
+    })
     const url = 'https://api.openweathermap.org/data/2.5/weather?q='+city+'&appid=59293c2b902435b0602bc67e592f4dd3';
     this.setState({
       isBusy : true
@@ -17,8 +26,8 @@ export default class App extends React.Component{
     fetch(url).then(response=>{
       return response.json();
     }).then(data=>{
-      const kelvin = data.main.temp;
-      const celcius = kelvin - 273.15;
+      const kelvin = (data.main.temp).toFixed(2);
+      const celcius = (kelvin - 273.15).toFixed(2);
       this.setState({
         temperature : celcius,
         tempK : kelvin,
@@ -26,7 +35,7 @@ export default class App extends React.Component{
       })
     }).catch(error=>{
       this.setState({
-        error : error.message(),
+        error : "Please enter a valid city!",
         isBusy : false
       });
     })
@@ -37,14 +46,14 @@ export default class App extends React.Component{
     if(this.state.isBusy && !this.state.error)
       data = <p>Loading..</p>
     else if(this.state.error)
-      data = <p>Something Went Wrong : {this.state.error}</p>
+      data = <p>{this.state.error}</p>
     else if(this.state.temperature !== '')
      data = <p>Temperature in Celcius : {this.state.temperature}°C.  <br/> Temperature in Kelvin : {this.state.tempK}K. </p>
     
     return(
       <React.Fragment>
         <Header /> <br/>
-        <InputCity getTemperature={this.getTemperature} /> <br/>
+        <InputCity getTemperature={this.getTemperature} addMessage={this.createMessage} /> <br/>
         {data}
       </React.Fragment>
     );
